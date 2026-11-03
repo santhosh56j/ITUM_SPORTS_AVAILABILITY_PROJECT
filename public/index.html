@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITUM Sports Equipment Availability</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-container {
+            width: 390px;
+            height: 844px;
+            background-color: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            padding: 24px;
+            flex-direction: column;
+            width: 100%;
+            height: calc(100% - 110px);
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .screen.dark-theme {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px 4px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            background-color: transparent;
+            z-index: 10;
+        }
+
+        .phone-container:has(.screen.dark-theme.active) .status-bar {
+            color: #ffffff;
+            background-color: #1a1a1a;
+        }
+
+        .app-brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #111111;
+        }
+
+        .app-subtitle {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #888888;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #888888;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 15px;
+            background-color: #f9fafb;
+            color: #111111;
+        }
+
+        .dark-theme .input-field {
+            background-color: #2a2a2a;
+            border-color: #3a3a3a;
+            color: #ffffff;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .filter-pill {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: none;
+            font-size: 14px;
+            background-color: #f3f4f6;
+            color: #666666;
+            cursor: pointer;
+        }
+
+        .filter-pill.active {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .eq-card {
+            background: #ffffff;
+            border: 1px solid #f0f0f0;
+            border-radius: 24px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 68px;
+            background-color: #222222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .nav-item {
+            color: #ffffff;
+            opacity: 0.6;
+            cursor: pointer;
+            font-size: 20px;
+            background: none;
+            border: none;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+        }
+
+        .primary-btn {
+            background-color: #929294;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .dark-theme .primary-btn {
+            background-color: #ffffff;
+            color: #1a1a1a;
+        }
+
+        /* History Tab Styles */
+        .segmented-control {
+            display: flex;
+            background-color: #2a2a2a;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: #888888;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .segment-btn.active {
+            background-color: #8b5cf6;
+            color: white;
+        }
+
+        .history-card {
+            background-color: #222222;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <!-- 1. SIGN IN SCREEN -->
+        <div id="screen-signin" class="screen active">
+            <div style="text-align: center; margin: 40px 0;">
+                <h1 class="app-brand">ITUM</h1>
+                <p class="app-subtitle">Sports Equipment Availability</p>
+                <h2 style="margin-top: 20px;">Connect With Us!</h2>
+            </div>
+            <div class="input-group"><input type="email" class="input-field" value="melpeters@gmail.com"></div>
+            <div class="input-group"><input type="password" class="input-field" value="••••••••••••"></div>
+            <button class="primary-btn" onclick="navigateTo('screen-home')">Sign In ➔</button>
+        </div>
+
+        <!-- 2. HOME SCREEN -->
+        <div id="screen-home" class="screen">
+            <h1 class="app-brand">ITUM</h1>
+            <p class="app-subtitle">Sports Equipment Availability</p>
+            <div class="filter-row">
+                <button class="filter-pill active">All</button>
+            </div>
+            <div class="equipment-grid" id="equipment-container"></div>
+        </div>
+
+        <!-- 3. EDIT PROFILE SCREEN (DARK) -->
+        <div id="screen-edit-profile" class="screen dark-theme">
+            <h2 style="text-align: center; margin-bottom: 24px;">Edit profile</h2>
+            <div class="input-group">
+                <label>Full name</label>
+                <input type="text" class="input-field" value="puerto_rico">
+            </div>
+            <div class="input-group">
+                <label>First name</label>
+                <input type="text" class="input-field" value="puerto_rico">
+            </div>
+            <div class="input-group">
+                <label>Field</label>
+                <input type="text" class="input-field" value="Information Technology">
+            </div>
+            <div class="input-group">
+                <label>Phone number</label>
+                <input type="text" class="input-field" value="04353743438">
+            </div>
+            <div class="input-group">
+                <label>ID Number</label>
+                <input type="text" class="input-field" value="24it8678">
+            </div>
+            <button class="primary-btn" style="background-color: #000; color: #fff; border: 1px solid #333;" onclick="navigateTo('screen-home')">SUBMIT</button>
+        </div>
+
+        <!-- 4. PRIVACY POLICY SCREEN (DARK) -->
+        <div id="screen-privacy" class="screen dark-theme">
+            <h2 style="text-align: center; margin-bottom: 20px;">Privacy Policy</h2>
+            <div style="font-size: 14px; line-height: 1.6; color: #cccccc;">
+                <h3>1. Types data we collect</h3>
+                <p style="margin-bottom: 16px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                <h3>2. Use of your personal data</h3>
+                <p style="margin-bottom: 16px;">Sed ut perspiciatis unde omnis iste natus error sit...</p>
+            </div>
+        </div>
+
+        <!-- 5. HISTORY SCREEN (DARK) -->
+        <div id="screen-history" class="screen dark-theme">
+            <h2 style="text-align: center; margin-bottom: 20px;">History</h2>
+            <div class="segmented-control">
+                <button class="segment-btn active">Upcoming</button>
+                <button class="segment-btn">Completed</button>
+                <button class="segment-btn">Cancelled</button>
+            </div>
+            <div class="history-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>football</strong>
+                    <span style="color: #888; font-size: 12px;">Today at 09:20 am</span>
+                </div>
+            </div>
+            <div class="history-card">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Henry</strong><br>
+                        <span style="color: #888; font-size: 12px;">Mustang Shelby GT</span>
+                    </div>
+                    <span style="color: #888; font-size: 12px;">Today at 10:20 am</span>
+<!-- Locate the sign-in form button inside your index.html and update it to call signInUser() -->
+<button class="primary-btn" onclick="signInUser()">Sign In ➔</button>
+
+<script>
+function signInUser() {
+    // 1. Capture dynamic credentials from input fields
+    const emailInput = document.querySelector('#screen-signin input[type="email"]').value;
+    const passwordInput = document.querySelector('#screen-signin input[type="password"]').value;
+
+    // 2. Send API payload verification request to backend server host link
+    fetch('http://localhost:5000/api/signin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: emailInput, password: passwordInput })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Sign in successful!");
+            navigateTo('screen-home'); // Proceed to home dashboard layout grid interface
+        } else {
+            alert("Sign-In failed: " + data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Connection error:", err);
+        alert("Cannot connect to authorization host server.");
+    });
+}
+</script>
