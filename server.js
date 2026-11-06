@@ -60,6 +60,7 @@ if (equipmentCount === 0) {
 }
 
 app.use(express.json({ limit: "10kb" }));
+app.use(express.static(path.join(__dirname, "public")));
 
 function parseSchedule(input) {
   const { date, time } = input;
@@ -164,4 +165,8 @@ app.post('/api/signin', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.listen(port, () => {
+  console.log(`Sports availability app listening at http://localhost:${port}`);
 });
